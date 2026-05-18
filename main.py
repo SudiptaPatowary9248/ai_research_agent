@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from search import search_web
-from transformers import pipeline
+# from transformers import pipeline
 # import summarize as sz
 import decision as dcsn
 import planner as pln
@@ -20,7 +20,16 @@ MAX_STEPS = 2
 MEMORY_SIZE = 5
 MODEL_NAME = "google/flan-t5-small"
 
-generator = pipeline("text2text-generation", model=MODEL_NAME)
+# generator = pipeline("text2text-generation", model=MODEL_NAME)
+
+# for Production API calls
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    api_key=os.getenv("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1"
+)
 
 def is_math_expression(query: str) -> bool:
     # Only allow digits, operators, parentheses, spaces
@@ -78,14 +87,26 @@ def detect_intent(query: str):
     else:
         return "general"
 
+# def generate_text(prompt: str):
+#     result = generator(
+#         prompt,
+#         max_length=120,
+#         do_sample=False,   # deterministic
+#         repetition_penalty=1.5  # reduces looping
+#     )[0]["generated_text"]
+#     return result
+
 def generate_text(prompt: str):
-    result = generator(
-        prompt,
-        max_length=120,
-        do_sample=False,   # deterministic
-        repetition_penalty=1.5  # reduces looping
-    )[0]["generated_text"]
-    return result
+    completion = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.3,
+        max_tokens=200,
+        frequency_penalty=0.5
+    )
+    return completion.choices[0].message.content
 
 # main function
 @app.get("/research")
