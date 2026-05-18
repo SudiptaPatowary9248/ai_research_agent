@@ -1,11 +1,19 @@
-from transformers import pipeline
+# from transformers import pipeline
 
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-planner = pipeline("text2text-generation", model="google/flan-t5-small")
+# planner = pipeline("text2text-generation", model="google/flan-t5-small")
+
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    api_key=os.getenv("GROQ_API_KEY"),
+    base_url="https://api.groq.com/openai/v1"
+)
 
 # for multi-step reasoning
 observation = ""
@@ -67,7 +75,17 @@ def plan_step(query: str, observation: str = "") -> str:
     Output ONLY JSON.
     """
 
-    out = planner(prompt, max_length=10, temperature=0)[0]["generated_text"]
+    # out = planner(prompt, max_length=10, temperature=0)[0]["generated_text"]
+    completion = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0,
+        max_tokens=20
+    )
+
+    out = completion.choices[0].message.content
     # print("raw planner output:", out)
     logger.info(f"raw planner output={out}")
     action = parse_action(out)
