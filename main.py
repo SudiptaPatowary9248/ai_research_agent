@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from search import search_web
 from transformers import pipeline
-import summarize as sz
+# import summarize as sz
 import decision as dcsn
 import planner as pln
 import re
