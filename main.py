@@ -98,7 +98,7 @@ def detect_intent(query: str):
 
 def generate_text(prompt: str):
     completion = client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="llama-3.1-8b-instant",
         messages=[
             {"role": "user", "content": prompt}
         ],
@@ -109,6 +109,12 @@ def generate_text(prompt: str):
     return completion.choices[0].message.content
 
 # main function
+@app.get("/")
+def home():
+    return {
+        "message": "AI Research Agent is running"
+    }
+
 @app.get("/research")
 def research(query: str):
     query = query.strip()

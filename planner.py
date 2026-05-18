@@ -77,7 +77,7 @@ def plan_step(query: str, observation: str = "") -> str:
 
     # out = planner(prompt, max_length=10, temperature=0)[0]["generated_text"]
     completion = client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="llama-3.1-8b-instant",
         messages=[
             {"role": "user", "content": prompt}
         ],
